@@ -12,8 +12,8 @@ package redblacktrees;
  */
 public class Node<E extends Comparable<E>> {
 
-    public static final int RED = 0;
-    public static final int BLACK = 1;
+    public  final int RED = 0;
+    public  final int BLACK = 1;
 
     public int color;
     public E key = null;

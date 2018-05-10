@@ -96,7 +96,6 @@ public class RedBlackTree<E extends Comparable<E>> {
                     node.parent.parent.color = RED;
                     rotateLeft(node.parent.parent);
                 }
-
             }
         }
         root.color = BLACK;
@@ -108,6 +107,9 @@ public class RedBlackTree<E extends Comparable<E>> {
         Node<E> originalNode = node;
 
         node.right = rightChild.left;
+        if (!isNil(node.right) && node.right != root) {
+            node.right.parent = node;
+        }
 
         if (node.parent == null) {
             root = rightChild;
@@ -120,6 +122,7 @@ public class RedBlackTree<E extends Comparable<E>> {
             rightChild.parent = originalNode.parent;
         }
         rightChild.left = node;
+        rightChild.left.parent = node;
         node.parent = rightChild;
 
     }
@@ -129,7 +132,9 @@ public class RedBlackTree<E extends Comparable<E>> {
         Node<E> originalNode = node;
 
         node.left = leftChild.right;
-
+        if (!isNil(node.right) && node.right != root) {
+            node.left.parent = node.left;
+        }
         if (node.parent == null) {
             root = leftChild;
             leftChild.parent = null;
@@ -141,6 +146,7 @@ public class RedBlackTree<E extends Comparable<E>> {
             leftChild.parent = originalNode.parent;
         }
         leftChild.right = node;
+        leftChild.right.parent = node;
         node.parent = leftChild;
     }
 
@@ -221,4 +227,141 @@ public class RedBlackTree<E extends Comparable<E>> {
             return search(node.right, key);
         }
     }
+
+    private Node<E> find(E key) {
+        return findWithRoot(root, key);
+    }
+
+    private Node<E> findWithRoot(Node<E> node, E key) {
+        if (isNil(node)) {
+            return node;
+        } else if (node.key == key) {
+            return node;
+        } else if (node.key.compareTo(key) > 0) {
+            return findWithRoot(node.left, key);
+        } else {
+            return findWithRoot(node.right, key);
+        }
+    }
+
+    private void transplant(Node<E> node1, Node<E> node2) {
+        System.out.println("hey transplant");
+        if (isNil(node1.parent) || node1 == root) {
+            root = node2;
+            System.out.println("ana root");
+        } else if (node1 == node1.parent.left) {
+            node1.parent.left = node2;
+        } else {
+            node1.parent.right = node2;
+        }
+        node2.parent = node1.parent;
+    }
+
+    private void deleteNode(Node<E> node) {
+        Node<E> y = node;
+        int yColour = y.color;
+        Node<E> x;
+        if (isNil(node.left)) {
+            x = node.right;
+            transplant(node, node.right);
+        } else if (isNil(node.right)) {
+            x = node.left;
+            transplant(node, node.left);
+        } else {
+            y = treeMinimum(node.right);
+            yColour = y.color;
+            x = y.right;
+            if (y.parent == node) {
+                x.parent = y;
+            } else {
+                transplant(y, y.right);
+                y.right = node.right;
+                y.right.parent = y;
+            }
+            transplant(node, y);
+
+            y.left = node.left;
+            y.left.parent = y;
+            y.color = node.color;
+        }
+        if (yColour == BLACK) {
+            System.out.println("Haroo7 l fixup");
+            deleteFixUp(x);
+        }
+    }
+
+    private Node<E> treeMinimum(Node<E> node) {
+        if (!isNil(node.left)) {
+            node = treeMinimum(node.left);
+            return node;
+        }
+        return node;
+    }
+
+    private void deleteFixUp(Node<E> node) {
+        Node<E> tempNode;
+        while (node != root && node.color == BLACK) {
+            if (node == node.parent.left) {
+                tempNode = node.parent.right;
+                if (tempNode.color == RED) {
+                    tempNode.color = BLACK;
+                    node.parent.color = RED;
+                    rotateLeft(node.parent);
+                    tempNode = node.parent.right;
+                }
+                if (tempNode.left.color == BLACK && tempNode.right.color == BLACK) {
+                    tempNode.color = RED;
+                    node = node.parent;
+                } else if (tempNode.right.color == BLACK) {
+                    tempNode.left.color = BLACK;
+                    tempNode.color = RED;
+                    rotateRight(tempNode);
+                    tempNode = node.parent.right;
+                } else {
+                    tempNode.color = node.parent.color;
+                    node.parent.color = BLACK;
+                    tempNode.right.color = BLACK;
+                    rotateLeft(node.parent);
+                    node = root;
+                }
+            } else if (node == node.parent.right) {
+                tempNode = node.parent.left;
+                if (tempNode.color == RED) {
+                    tempNode.color = BLACK;
+                    node.parent.color = RED;
+                    rotateRight(node.parent);
+                    tempNode = node.parent.left;
+                }
+                if (tempNode.right.color == BLACK && tempNode.left.color == BLACK) {
+                    tempNode.color = RED;
+                    node = node.parent;
+                } else if (tempNode.left.color == BLACK) {
+                    tempNode.right.color = BLACK;
+                    tempNode.color = RED;
+                    rotateLeft(tempNode);
+                    tempNode = node.parent.left;
+                } else {
+                    tempNode.color = node.parent.color;
+                    node.parent.color = BLACK;
+                    tempNode.left.color = BLACK;
+                    rotateRight(node.parent);
+                    node = root;
+                }
+            }
+        }
+        node.color = BLACK;
+    }
+
+    public void delete(E key) {
+        Node<E> node;
+        node = find(key);
+        if (!isNil(node)) {
+            System.out.println("Found!");
+            deleteNode(node);
+
+        } else {
+            System.out.println("Can't Delete Node That Doesn't Exist");
+        }
+    }
+
 }
