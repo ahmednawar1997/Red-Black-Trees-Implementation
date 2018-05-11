@@ -1,5 +1,7 @@
 package redblacktrees;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author ahmed
@@ -14,6 +16,8 @@ public class RedBlackTree<E extends Comparable<E>> {
     public static final int BLACK = 1;
 
     public final Node<E> nil;
+    public int treeSize = 0;
+    private ArrayList<E> sortedTree = new ArrayList<>();
 
     public Node<E> root = null;
 
@@ -23,6 +27,7 @@ public class RedBlackTree<E extends Comparable<E>> {
     }
 
     public void insert(E key) {
+        treeSize++;
         if (root == null) {
             root = new Node<>(key);
             root.color = BLACK;
@@ -32,6 +37,14 @@ public class RedBlackTree<E extends Comparable<E>> {
             insertNode(key, root);
         }
 
+    }
+
+    public int getTreeSize() {
+        return treeSize;
+    }
+
+    public ArrayList<E> getSortedTreeArray() {
+        return sortedTree;
     }
 
     private void insertNode(E key, Node<E> node) {
@@ -157,7 +170,11 @@ public class RedBlackTree<E extends Comparable<E>> {
         }
     }
 
-    public int height(Node<E> root) {
+    public int getTreeHeight() {
+        return height(root);
+    }
+
+    private int height(Node<E> root) {
         if (isNil(root) || root == null) {
             return 0;
         } else {
@@ -193,6 +210,10 @@ public class RedBlackTree<E extends Comparable<E>> {
     }
 
     public void printSorted() {
+        sortedTree.clear();
+        if (root == null) {
+            return;
+        }
         inOrder(root);
     }
 
@@ -200,8 +221,10 @@ public class RedBlackTree<E extends Comparable<E>> {
         if (!isNil(node)) {
             inOrder(node.left);
             if (node.color == RED) {
+                sortedTree.add(node.key);
                 System.out.print(ANSI_RED + node.key + " ");
             } else {
+                sortedTree.add(node.key);
                 System.out.print(ANSI_RESET + node.key + " ");
             }
             inOrder(node.right);
@@ -217,9 +240,9 @@ public class RedBlackTree<E extends Comparable<E>> {
     }
 
     private boolean search(Node<E> node, E key) {
-        if (isNil(node)) {
+        if (isNil(node) || node == null) {
             return false;
-        } else if (node.key == key) {
+        } else if (node.key.equals(key)) {
             return true;
         } else if (node.key.compareTo(key) > 0) {
             return search(node.left, key);
@@ -235,7 +258,7 @@ public class RedBlackTree<E extends Comparable<E>> {
     private Node<E> findWithRoot(Node<E> node, E key) {
         if (isNil(node)) {
             return node;
-        } else if (node.key == key) {
+        } else if (node.key.equals(key)) {
             return node;
         } else if (node.key.compareTo(key) > 0) {
             return findWithRoot(node.left, key);
@@ -355,9 +378,15 @@ public class RedBlackTree<E extends Comparable<E>> {
     public void delete(E key) {
         Node<E> node;
         node = find(key);
+
+        if (node == root && isNil(node.left) && isNil(node.right)) {
+            treeSize--;
+            root = null;
+            return;
+        }
         if (!isNil(node)) {
-            System.out.println("Found!");
             deleteNode(node);
+            treeSize--;
 
         } else {
             System.out.println("Can't Delete Node That Doesn't Exist");
