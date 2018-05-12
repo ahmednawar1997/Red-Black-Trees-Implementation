@@ -124,7 +124,7 @@ public class RedBlackTree<E extends Comparable<E>> {
             node.right.parent = node;
         }
 
-        if (node.parent == null) {
+        if (node == root) {
             root = rightChild;
             rightChild.parent = null;
         } else if (originalNode.isLeftChild()) {
@@ -145,10 +145,10 @@ public class RedBlackTree<E extends Comparable<E>> {
         Node<E> originalNode = node;
 
         node.left = leftChild.right;
-        if (!isNil(node.right) && node.right != root) {
-            node.left.parent = node.left;
+        if (!isNil(node.left) && node.left != root) {
+            node.left.parent = node;
         }
-        if (node.parent == null) {
+        if (node == root) {
             root = leftChild;
             leftChild.parent = null;
         } else if (originalNode.isLeftChild()) {
@@ -219,6 +219,7 @@ public class RedBlackTree<E extends Comparable<E>> {
 
     private void inOrder(Node<E> node) {
         if (!isNil(node)) {
+            //System.out.println("hi"+node.key);
             inOrder(node.left);
             if (node.color == RED) {
                 sortedTree.add(node.key);
